@@ -349,6 +349,9 @@
     "use strict";
 
     console.log('Skin creator loading...');
+    window.onerror = function(msg, url, line) {
+      console.error('Error:', msg, 'at line', line);
+    };
 
     // --- Canvas setup ---
     const W = 64, H = 64;
@@ -362,6 +365,7 @@
 
     const statusText = document.getElementById('statusText');
     const coordText = document.getElementById('coordText');
+    const chkGrid = document.getElementById('chkGrid');
 
     // Data buffer: Uint8Clamped RGBA in ImageData
     let img = ctx.createImageData(W, H);
@@ -681,7 +685,6 @@
     const btnFill = document.getElementById('btnFill');
     const btnFlipH = document.getElementById('btnFlipH');
     const btnFlipV = document.getElementById('btnFlipV');
-    const chkGrid = document.getElementById('chkGrid');
 
     btnUndo.addEventListener('click', undo);
     btnRedo.addEventListener('click', redo);
