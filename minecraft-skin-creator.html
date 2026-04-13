@@ -364,8 +364,8 @@
     // Data buffer: Uint8Clamped RGBA in ImageData
     let img = ctx.createImageData(W, H);
 
-    // Transparent default
-    clearImage();
+    // Default to Steve template so canvas isn't empty/transparent
+    loadSteveTemplate();
 
     // --- Undo / Redo ---
     const undoStack = [];
@@ -603,7 +603,8 @@
 
     view.addEventListener('pointerdown', (e) => {
       e.preventDefault();
-      view.setPointerCapture(e.pointerId);
+      e.stopPropagation();
+      try { view.setPointerCapture(e.pointerId); } catch(err){}
       drawing = true;
       snapshot();
       const p = canvasToPixel(e.clientX, e.clientY);
@@ -612,6 +613,35 @@
       setCoordsText(p.x,p.y);
       render();
     });
+
+    // Also handle touch events directly for better iPad support
+    view.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const touch = e.touches[0];
+      drawing = true;
+      snapshot();
+      const p = canvasToPixel(touch.clientX, touch.clientY);
+      last = p;
+      paintAt(p.x, p.y);
+      setCoordsText(p.x,p.y);
+      render();
+    }, { passive: false });
+
+    view.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const touch = e.touches[0];
+      const p = canvasToPixel(touch.clientX, touch.clientY);
+      setCoordsText(p.x,p.y);
+      if (!drawing) return;
+      if (last) line(last, p);
+      last = p;
+      render();
+    }, { passive: false });
+
+    view.addEventListener('touchend', endDraw);
+    view.addEventListener('touchcancel', endDraw);
 
     view.addEventListener('pointermove', (e) => {
       const p = canvasToPixel(e.clientX, e.clientY);
@@ -627,6 +657,7 @@
     view.addEventListener('pointerup', endDraw);
     view.addEventListener('pointercancel', endDraw);
     view.addEventListener('pointerleave', () => { if (!drawing) setCoordsText(null,null); });
+    view.addEventListener('pointerout', endDraw);
 
     // Keyboard shortcuts (desktop)
     window.addEventListener('keydown', (e) => {
