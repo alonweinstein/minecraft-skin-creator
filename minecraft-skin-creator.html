@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Minecraft Skin Creator (64×64)</title>
+  <style>
+    :root{
+      --bg:#0b1020;
+      --panel:#111a33;
+      --panel2:#0f1730;
+      --text:#f7fbff;
+      --muted:#b7c6ff;
+      --accent:#00e5ff;
+      --accent2:#ff4dd8;
+      --good:#21f07a;
+      --warn:#ffd166;
+      --danger:#ff4d4d;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+      --btn: 16px;
+    }
+
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-rounded, system-ui, -apple-system, "SF Pro Rounded", "Segoe UI", Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 800px at 10% 10%, rgba(0,229,255,.25), transparent 55%),
+        radial-gradient(900px 700px at 90% 20%, rgba(255,77,216,.22), transparent 60%),
+        radial-gradient(800px 700px at 50% 100%, rgba(33,240,122,.15), transparent 60%),
+        var(--bg);
+      color: var(--text);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+
+    .wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px 16px 28px;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 14px;
+      padding: 10px 6px 16px;
+    }
+
+    .title{
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
+    }
+
+    h1{
+      margin:0;
+      font-size: 20px;
+      letter-spacing: .2px;
+    }
+
+    .subtitle{
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.25;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 16px;
+      align-items:start;
+    }
+
+    @media (max-width: 920px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(17,26,51,.95), rgba(15,23,48,.92));
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .card h2{
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: .3px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .card .head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: rgba(0,0,0,.10);
+    }
+
+    .card .body{ padding: 14px; }
+
+    .canvasWrap{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+      align-items:center;
+      justify-content:center;
+      padding: 12px;
+    }
+
+    .stage{
+      width: min(92vw, 640px);
+      aspect-ratio: 1/1;
+      display:grid;
+      place-items:center;
+      border-radius: 16px;
+      background:
+        repeating-linear-gradient(45deg, rgba(255,255,255,.06) 0 10px, rgba(0,0,0,.06) 10px 20px);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+      position: relative;
+    }
+
+    canvas#view{
+      width: 92%;
+      height: 92%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      border-radius: 10px;
+      background: rgba(0,0,0,.25);
+      touch-action: none;
+    }
+
+    .hintRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+      justify-content:center;
+      color: rgba(247,251,255,.85);
+      font-size: 13px;
+    }
+
+    .pill{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      white-space: nowrap;
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .controls .wide{ grid-column: 1 / -1; }
+
+    button{
+      appearance: none;
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 14px;
+      font-size: var(--btn);
+      font-weight: 800;
+      color: var(--text);
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 25px rgba(0,0,0,.25);
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    button:active{ transform: translateY(1px) scale(.99); }
+
+    .primary{ background: linear-gradient(135deg, rgba(0,229,255,.35), rgba(0,229,255,.10)); border-color: rgba(0,229,255,.35); }
+    .good{ background: linear-gradient(135deg, rgba(33,240,122,.35), rgba(33,240,122,.10)); border-color: rgba(33,240,122,.35); }
+    .warn{ background: linear-gradient(135deg, rgba(255,209,102,.35), rgba(255,209,102,.10)); border-color: rgba(255,209,102,.35); }
+    .danger{ background: linear-gradient(135deg, rgba(255,77,77,.35), rgba(255,77,77,.10)); border-color: rgba(255,77,77,.35); }
+
+    .small{ font-size: 14px; padding: 12px 12px; border-radius: 14px; font-weight: 800; }
+
+    .row{ display:flex; gap: 10px; flex-wrap: wrap; }
+
+    .palette{
+      display:grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+    }
+
+    .swatch{
+      width: 100%;
+      aspect-ratio: 1/1;
+      border-radius: 14px;
+      border: 2px solid rgba(255,255,255,.12);
+      box-shadow: 0 10px 18px rgba(0,0,0,.25);
+      position: relative;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .swatch.selected{
+      outline: 4px solid rgba(0,229,255,.85);
+      outline-offset: 2px;
+    }
+
+    .swatch.transparent{
+      background:
+        linear-gradient(45deg, rgba(255,255,255,.2) 0 25%, rgba(0,0,0,.15) 25% 50%, rgba(255,255,255,.2) 50% 75%, rgba(0,0,0,.15) 75% 100%);
+      background-size: 18px 18px;
+    }
+
+    .toolRow{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .toggle{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 12px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.16);
+    }
+
+    .toggle label{ font-weight: 800; }
+
+    input[type="checkbox"]{
+      width: 22px;
+      height: 22px;
+      accent-color: var(--accent);
+    }
+
+    .footerNote{
+      color: rgba(247,251,255,.75);
+      font-size: 12px;
+      line-height: 1.35;
+      margin-top: 10px;
+    }
+
+    .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New"; font-size: 12px; padding: 2px 6px; border-radius: 8px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); }
+
+    .status{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.10);
+      margin-top: 10px;
+      font-size: 13px;
+      color: rgba(247,251,255,.85);
+    }
+
+    .dot{ width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(0,229,255,.18); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <h1>Minecraft Skin Creator</h1>
+        <div class="subtitle">Draw on a 64×64 skin, then export as a PNG. Big buttons, iPad friendly, kid-proof-ish.</div>
+      </div>
+      <div class="row">
+        <button id="btnExport" class="good">Export PNG</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <div class="head">
+          <h2>Skin Canvas (64×64)</h2>
+          <div class="row">
+            <button id="btnUndo" class="small warn" title="Undo (⌘/Ctrl+Z)">Undo</button>
+            <button id="btnRedo" class="small" title="Redo (⇧⌘/Ctrl+Z)">Redo</button>
+          </div>
+        </div>
+        <div class="body canvasWrap">
+          <div class="stage">
+            <canvas id="view" width="64" height="64"></canvas>
+          </div>
+          <div class="hintRow">
+            <div class="pill">Draw with your finger ✍️</div>
+            <div class="pill">Pinch-zoom the page if you want</div>
+            <div class="pill"><span class="kbd">Tap</span> to paint, <span class="kbd">Hold</span> and drag to draw</div>
+          </div>
+          <div class="status" aria-live="polite">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="dot"></div>
+              <div id="statusText">Tool: Brush • Color: #000000</div>
+            </div>
+            <div id="coordText">x: – • y: –</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="head">
+          <h2>Tools + Colors</h2>
+          <div class="row">
+            <button id="btnSteve" class="primary small">Load Steve</button>
+            <button id="btnClear" class="danger small">Clear</button>
+          </div>
+        </div>
+        <div class="body">
+          <div class="toolRow" style="margin-bottom:12px;">
+            <button id="toolBrush" class="primary">Brush</button>
+            <button id="toolEraser">Eraser</button>
+          </div>
+
+          <div class="controls" style="margin-bottom:12px;">
+            <button id="btnFill" class="wide warn">Fill All</button>
+            <button id="btnFlipH">Flip ⟷</button>
+            <button id="btnFlipV">Flip ⟷ (Up/Down)</button>
+          </div>
+
+          <div class="toggle" style="margin-bottom:12px;">
+            <label for="chkGrid">Show grid</label>
+            <input id="chkGrid" type="checkbox" checked />
+          </div>
+
+          <div class="palette" id="palette"></div>
+          <div class="footerNote">
+            Tip: Transparent squares mean "see-through". Many Minecraft skins use it for hats and layers.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    "use strict";
+
+    // --- Canvas setup ---
+    const W = 64, H = 64;
+    const view = document.getElementById('view');
+    const ctx = view.getContext('2d', { willReadFrequently: true });
+
+    // Offscreen for grid overlay compositing
+    const off = document.createElement('canvas');
+    off.width = W; off.height = H;
+    const offCtx = off.getContext('2d', { willReadFrequently: true });
+
+    const statusText = document.getElementById('statusText');
+    const coordText = document.getElementById('coordText');
+
+    // Data buffer: Uint8Clamped RGBA in ImageData
+    let img = ctx.createImageData(W, H);
+
+    // Transparent default
+    clearImage();
+
+    // --- Undo / Redo ---
+    const undoStack = [];
+    const redoStack = [];
+    const MAX_HISTORY = 40;
+
+    function snapshot(){
+      // Store a copy of the pixels
+      const copy = new Uint8ClampedArray(img.data);
+      undoStack.push(copy);
+      if (undoStack.length > MAX_HISTORY) undoStack.shift();
+      redoStack.length = 0;
+      updateUndoRedo();
+    }
+
+    function restoreFrom(arr){
+      img.data.set(arr);
+      render();
+    }
+
+    function undo(){
+      if (!undoStack.length) return;
+      const cur = new Uint8ClampedArray(img.data);
+      redoStack.push(cur);
+      const prev = undoStack.pop();
+      restoreFrom(prev);
+      updateUndoRedo();
+    }
+
+    function redo(){
+      if (!redoStack.length) return;
+      const cur = new Uint8ClampedArray(img.data);
+      undoStack.push(cur);
+      const next = redoStack.pop();
+      restoreFrom(next);
+      updateUndoRedo();
+    }
+
+    function updateUndoRedo(){
+      btnUndo.disabled = undoStack.length === 0;
+      btnRedo.disabled = redoStack.length === 0;
+      btnUndo.style.opacity = btnUndo.disabled ? .55 : 1;
+      btnRedo.style.opacity = btnRedo.disabled ? .55 : 1;
+    }
+
+    // --- Palette ---
+    // A kid-friendly set of Minecraft-ish colors (not exact), plus transparent.
+    const COLORS = [
+      { name: 'Transparent', rgba: [0,0,0,0], transparent: true },
+      { name: 'Black', rgba: [0,0,0,255] },
+      { name: 'White', rgba: [255,255,255,255] },
+      { name: 'Gray', rgba: [125,125,125,255] },
+      { name: 'Dark Gray', rgba: [63,63,63,255] },
+      { name: 'Red', rgba: [255,77,77,255] },
+      { name: 'Orange', rgba: [255,153,51,255] },
+      { name: 'Yellow', rgba: [255,230,70,255] },
+      { name: 'Lime', rgba: [130,255,80,255] },
+      { name: 'Green', rgba: [62,180,84,255] },
+      { name: 'Cyan', rgba: [0,229,255,255] },
+      { name: 'Blue', rgba: [64,128,255,255] },
+      { name: 'Navy', rgba: [20,38,110,255] },
+      { name: 'Purple', rgba: [150,80,255,255] },
+      { name: 'Magenta', rgba: [255,77,216,255] },
+      { name: 'Brown', rgba: [140,95,55,255] },
+      { name: 'Tan', rgba: [210,170,120,255] },
+      { name: 'Skin', rgba: [198,134,86,255] },
+      { name: 'Dark Skin', rgba: [140,92,60,255] },
+      { name: 'Hair', rgba: [62,42,24,255] },
+      { name: 'Gold', rgba: [255,209,102,255] },
+      { name: 'Stone', rgba: [140,140,150,255] },
+      { name: 'Grass', rgba: [110,200,90,255] },
+      { name: 'Dirt', rgba: [125,85,50,255] }
+    ];
+
+    const paletteEl = document.getElementById('palette');
+    let selectedColor = COLORS[1].rgba.slice();
+
+    function rgbaToHex(rgba){
+      const [r,g,b,a] = rgba;
+      if (a === 0) return 'transparent';
+      return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+    }
+
+    function buildPalette(){
+      paletteEl.innerHTML = '';
+      COLORS.forEach((c, i) => {
+        const d = document.createElement('div');
+        d.className = 'swatch' + (c.transparent ? ' transparent' : '');
+        if (!c.transparent) d.style.background = rgbaToHex(c.rgba);
+        d.title = c.name;
+        d.setAttribute('role','button');
+        d.setAttribute('tabindex','0');
+        d.addEventListener('click', () => selectColor(i));
+        d.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectColor(i); }
+        });
+        paletteEl.appendChild(d);
+      });
+      selectColor(1);
+    }
+
+    function selectColor(i){
+      const sw = paletteEl.children;
+      for (let j=0;j<sw.length;j++) sw[j].classList.toggle('selected', j===i);
+      selectedColor = COLORS[i].rgba.slice();
+      updateStatus();
+    }
+
+    buildPalette();
+
+    // --- Tools ---
+    const TOOL_BRUSH = 'brush';
+    const TOOL_ERASER = 'eraser';
+    let tool = TOOL_BRUSH;
+
+    const toolBrush = document.getElementById('toolBrush');
+    const toolEraser = document.getElementById('toolEraser');
+
+    function setTool(t){
+      tool = t;
+      toolBrush.classList.toggle('primary', tool === TOOL_BRUSH);
+      toolEraser.classList.toggle('primary', tool === TOOL_ERASER);
+      updateStatus();
+    }
+
+    toolBrush.addEventListener('click', () => setTool(TOOL_BRUSH));
+    toolEraser.addEventListener('click', () => setTool(TOOL_ERASER));
+
+    function updateStatus(){
+      const colorLabel = (tool === TOOL_ERASER) ? 'transparent' : rgbaToHex(selectedColor);
+      statusText.textContent = `Tool: ${tool === TOOL_BRUSH ? 'Brush' : 'Eraser'} • Color: ${colorLabel}`;
+    }
+    updateStatus();
+
+    // --- Drawing helpers ---
+    function idx(x,y){ return (y*W + x)*4; }
+
+    function setPixel(x,y, rgba){
+      if (x<0||y<0||x>=W||y>=H) return;
+      const k = idx(x,y);
+      img.data[k]   = rgba[0];
+      img.data[k+1] = rgba[1];
+      img.data[k+2] = rgba[2];
+      img.data[k+3] = rgba[3];
+    }
+
+    function getPixel(x,y){
+      const k = idx(x,y);
+      return [img.data[k], img.data[k+1], img.data[k+2], img.data[k+3]];
+    }
+
+    function samePixel(a,b){ return a[0]===b[0]&&a[1]===b[1]&&a[2]===b[2]&&a[3]===b[3]; }
+
+    function paintAt(x,y){
+      const rgba = (tool === TOOL_ERASER) ? [0,0,0,0] : selectedColor;
+      setPixel(x,y, rgba);
+    }
+
+    function render(){
+      // Base image
+      offCtx.putImageData(img, 0, 0);
+
+      // Optional grid overlay
+      if (chkGrid.checked){
+        offCtx.save();
+        offCtx.globalCompositeOperation = 'source-over';
+        offCtx.strokeStyle = 'rgba(255,255,255,0.18)';
+        offCtx.lineWidth = 0.03; // tiny, scales visually via CSS
+        // draw every 1px (heavy), plus thicker 8px blocks
+        // To keep it light, draw thicker 8x8 blocks only + a subtle 1px grid.
+        // 1px grid
+        offCtx.strokeStyle = 'rgba(0,0,0,0.25)';
+        offCtx.lineWidth = 0.03;
+        offCtx.beginPath();
+        for (let i=0;i<=W;i++){
+          offCtx.moveTo(i+0.5, 0);
+          offCtx.lineTo(i+0.5, H);
+        }
+        for (let j=0;j<=H;j++){
+          offCtx.moveTo(0, j+0.5);
+          offCtx.lineTo(W, j+0.5);
+        }
+        offCtx.stroke();
+
+        // 8x8 blocks
+        offCtx.strokeStyle = 'rgba(0,229,255,0.25)';
+        offCtx.lineWidth = 0.15;
+        offCtx.beginPath();
+        for (let i=0;i<=W;i+=8){
+          offCtx.moveTo(i+0.5, 0);
+          offCtx.lineTo(i+0.5, H);
+        }
+        for (let j=0;j<=H;j+=8){
+          offCtx.moveTo(0, j+0.5);
+          offCtx.lineTo(W, j+0.5);
+        }
+        offCtx.stroke();
+        offCtx.restore();
+      }
+
+      ctx.clearRect(0,0,W,H);
+      ctx.drawImage(off, 0, 0);
+    }
+
+    // --- Pointer drawing (touch friendly) ---
+    let drawing = false;
+    let last = null;
+
+    function canvasToPixel(clientX, clientY){
+      const r = view.getBoundingClientRect();
+      const x = Math.floor((clientX - r.left) / r.width * W);
+      const y = Math.floor((clientY - r.top) / r.height * H);
+      return {x, y};
+    }
+
+    function line(a,b){
+      // Bresenham
+      let x0=a.x, y0=a.y, x1=b.x, y1=b.y;
+      const dx = Math.abs(x1-x0), sx = x0<x1 ? 1 : -1;
+      const dy = -Math.abs(y1-y0), sy = y0<y1 ? 1 : -1;
+      let err = dx + dy;
+      while(true){
+        paintAt(x0,y0);
+        if (x0===x1 && y0===y1) break;
+        const e2 = 2*err;
+        if (e2 >= dy){ err += dy; x0 += sx; }
+        if (e2 <= dx){ err += dx; y0 += sy; }
+      }
+    }
+
+    function setCoordsText(x,y){
+      if (x==null || y==null || x<0 || y<0 || x>=W || y>=H) coordText.textContent = 'x: – • y: –';
+      else coordText.textContent = `x: ${x} • y: ${y}`;
+    }
+
+    view.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      view.setPointerCapture(e.pointerId);
+      drawing = true;
+      snapshot();
+      const p = canvasToPixel(e.clientX, e.clientY);
+      last = p;
+      paintAt(p.x, p.y);
+      setCoordsText(p.x,p.y);
+      render();
+    });
+
+    view.addEventListener('pointermove', (e) => {
+      const p = canvasToPixel(e.clientX, e.clientY);
+      setCoordsText(p.x,p.y);
+      if (!drawing) return;
+      e.preventDefault();
+      if (last) line(last, p);
+      last = p;
+      render();
+    });
+
+    function endDraw(){ drawing = false; last = null; }
+    view.addEventListener('pointerup', endDraw);
+    view.addEventListener('pointercancel', endDraw);
+    view.addEventListener('pointerleave', () => { if (!drawing) setCoordsText(null,null); });
+
+    // Keyboard shortcuts (desktop)
+    window.addEventListener('keydown', (e) => {
+      const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+      const mod = isMac ? e.metaKey : e.ctrlKey;
+      if (mod && e.key.toLowerCase() === 'z'){
+        e.preventDefault();
+        if (e.shiftKey) redo();
+        else undo();
+      }
+    });
+
+    // --- Buttons ---
+    const btnExport = document.getElementById('btnExport');
+    const btnClear = document.getElementById('btnClear');
+    const btnSteve = document.getElementById('btnSteve');
+    const btnUndo = document.getElementById('btnUndo');
+    const btnRedo = document.getElementById('btnRedo');
+    const btnFill = document.getElementById('btnFill');
+    const btnFlipH = document.getElementById('btnFlipH');
+    const btnFlipV = document.getElementById('btnFlipV');
+    const chkGrid = document.getElementById('chkGrid');
+
+    btnUndo.addEventListener('click', undo);
+    btnRedo.addEventListener('click', redo);
+
+    chkGrid.addEventListener('change', render);
+
+    btnClear.addEventListener('click', () => {
+      if (!confirm('Clear the whole skin?')) return;
+      snapshot();
+      clearImage();
+      render();
+    });
+
+    btnFill.addEventListener('click', () => {
+      const rgba = (tool === TOOL_ERASER) ? [0,0,0,0] : selectedColor;
+      snapshot();
+      for (let y=0;y<H;y++) for (let x=0;x<W;x++) setPixel(x,y,rgba);
+      render();
+    });
+
+    btnFlipH.addEventListener('click', () => {
+      snapshot();
+      const copy = new Uint8ClampedArray(img.data);
+      for (let y=0;y<H;y++){
+        for (let x=0;x<W;x++){
+          const src = (y*W + x)*4;
+          const dst = (y*W + (W-1-x))*4;
+          img.data[dst] = copy[src];
+          img.data[dst+1] = copy[src+1];
+          img.data[dst+2] = copy[src+2];
+          img.data[dst+3] = copy[src+3];
+        }
+      }
+      render();
+    });
+
+    btnFlipV.addEventListener('click', () => {
+      snapshot();
+      const copy = new Uint8ClampedArray(img.data);
+      for (let y=0;y<H;y++){
+        for (let x=0;x<W;x++){
+          const src = (y*W + x)*4;
+          const dst = ((H-1-y)*W + x)*4;
+          img.data[dst] = copy[src];
+          img.data[dst+1] = copy[src+1];
+          img.data[dst+2] = copy[src+2];
+          img.data[dst+3] = copy[src+3];
+        }
+      }
+      render();
+    });
+
+    btnExport.addEventListener('click', exportPng);
+
+    function exportPng(){
+      // Export the raw skin without the grid overlay.
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = W; exportCanvas.height = H;
+      const ex = exportCanvas.getContext('2d', { willReadFrequently: true });
+      ex.putImageData(img, 0, 0);
+
+      const a = document.createElement('a');
+      a.download = 'minecraft-skin-64x64.png';
+      a.href = exportCanvas.toDataURL('image/png');
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    // --- Steve template ---
+    // Notes:
+    // Minecraft skin layout is a UV map. This template paints a simplified, "good enough" Steve-style skin
+    // across the correct 64x64 canvas areas using block colors.
+    // It is intentionally simple and editable by kids.
+    btnSteve.addEventListener('click', () => {
+      if (!confirm('Load Steve template? This will replace your current drawing.')) return;
+      snapshot();
+      loadSteveTemplate();
+      render();
+    });
+
+    function clearImage(){
+      for (let i=0;i<img.data.length;i+=4){
+        img.data[i]=0; img.data[i+1]=0; img.data[i+2]=0; img.data[i+3]=0;
+      }
+      render();
+      updateUndoRedo();
+    }
+
+    function rect(x,y,w,h, rgba){
+      for (let j=0;j<h;j++) for (let i=0;i<w;i++) setPixel(x+i,y+j,rgba);
+    }
+
+    function checkerRect(x,y,w,h, a,b){
+      for (let j=0;j<h;j++) for (let i=0;i<w;i++) setPixel(x+i,y+j, ((i+j)&1)?a:b);
+    }
+
+    function loadSteveTemplate(){
+      clearImage();
+
+      // Palette picks (approx)
+      const SKIN = [198,134,86,255];
+      const SKIN2 = [180,120,78,255];
+      const HAIR = [62,42,24,255];
+      const EYE_W = [255,255,255,255];
+      const EYE_B = [64,128,255,255];
+      const MOUTH = [140,92,60,255];
+
+      const SHIRT = [62,127,184,255];
+      const SHIRT2 = [50,110,165,255];
+      const PANTS = [30,55,140,255];
+      const PANTS2 = [24,44,120,255];
+      const SHOES = [63,63,63,255];
+
+      // --- Head (top-left area in classic layout) ---
+      // Head: x 0..31, y 0..15 (top row). We'll paint the front face area (8x8) and some surrounding.
+      // Face front is at (8,8) for classic 64x32; in 64x64, it remains.
+      // We'll paint the whole head base areas lightly.
+      rect(0,0,32,16, SKIN2);
+      // Hair cap bands on top row
+      rect(0,0,32,4, HAIR);
+      rect(0,4,32,2, [76,56,32,255]);
+
+      // Face front at (8,8) 8x8
+      rect(8,8,8,8, SKIN);
+      // Eyes
+      rect(10,11,2,1, EYE_W);
+      rect(10,12,2,1, EYE_B);
+      rect(14,11,2,1, EYE_W);
+      rect(14,12,2,1, EYE_B);
+      // Nose + mouth
+      rect(12,13,1,1, SKIN2);
+      rect(11,15,4,1, MOUTH);
+
+      // Add subtle hair fringe on face
+      rect(8,8,8,1, HAIR);
+      rect(8,9,2,1, HAIR);
+      rect(14,9,2,1, HAIR);
+
+      // --- Body (torso) ---
+      // Torso textures live at x 16..39, y 16..31 (upper body region)
+      rect(16,16,24,16, SHIRT);
+      rect(16,16,24,3, SHIRT2);
+      // simple collar
+      rect(26,16,4,3, [35,70,120,255]);
+
+      // --- Right arm (classic) ---
+      // Arm region: x 40..55, y 16..31
+      rect(40,16,16,16, SHIRT);
+      rect(40,16,16,3, SHIRT2);
+      // hand area near bottom
+      rect(44,28,8,4, SKIN);
+
+      // --- Legs ---
+      // Leg region: x 0..31, y 16..31
+      rect(0,16,32,16, PANTS);
+      rect(0,16,32,3, PANTS2);
+      // shoes
+      rect(4,28,12,4, SHOES);
+      rect(20,28,12,4, SHOES);
+
+      // --- 64x64 "second layer" (hat/jacket/pants overlay/arms) ---
+      // We'll add a simple hat overlay (semi-transparent-ish look by using darker tone).
+      // Hat layer head: x 32..63, y 0..15
+      // Keep it mostly transparent but add a dark border cap so it feels like a hat.
+      // Use transparency in middle.
+      rect(32,0,32,16, [0,0,0,0]);
+      rect(32,0,32,3, [35,35,35,255]);
+      rect(32,3,32,1, [0,0,0,0]);
+      // little brim
+      rect(40,7,16,1, [35,35,35,255]);
+
+      // Jacket overlay for torso: x 16..39, y 32..47
+      rect(16,32,24,16, [0,0,0,0]);
+      // Add a small logo on chest using bright color
+      rect(26,38,4,4, [255,230,70,255]);
+      rect(27,39,2,2, [255,77,216,255]);
+
+      // Right arm overlay: x 40..55, y 32..47
+      rect(40,32,16,16, [0,0,0,0]);
+      // Add stripe
+      rect(40,36,16,2, [255,209,102,255]);
+
+      // Left arm (newer 64x64) uses bottom right area: x 32..47, y 48..63
+      rect(32,48,16,16, SHIRT);
+      rect(32,48,16,3, SHIRT2);
+      rect(36,60,8,4, SKIN);
+
+      // Left arm overlay: x 48..63, y 48..63
+      rect(48,48,16,16, [0,0,0,0]);
+      rect(48,54,16,2, [255,209,102,255]);
+
+      // Left leg (64x64) at x 16..31, y 48..63
+      rect(16,48,16,16, PANTS);
+      rect(16,48,16,3, PANTS2);
+      rect(18,60,12,4, SHOES);
+
+      // Left leg overlay at x 0..15, y 48..63
+      rect(0,48,16,16, [0,0,0,0]);
+      // Knee patch
+      rect(6,56,4,4, [140,140,150,255]);
+
+      // Add some fun confetti pixels around empty areas (still within map) for kid delight, but very subtle.
+      const conf = [
+        [255,77,77,255], [255,153,51,255], [255,230,70,255], [130,255,80,255], [0,229,255,255], [150,80,255,255]
+      ];
+      for (let i=0;i<50;i++){
+        const x = (i*13) % 64;
+        const y = (i*29 + 7) % 64;
+        // only sprinkle on fully transparent pixels
+        if (getPixel(x,y)[3] === 0) setPixel(x,y, conf[i % conf.length]);
+      }
+
+      updateStatus();
+      updateUndoRedo();
+    }
+
+    // Start with Steve so there's something on screen
+    loadSteveTemplate();
+    undoStack.length = 0;
+    redoStack.length = 0;
+    updateUndoRedo();
+    snapshot();
+    render();
+
+  })();
+  </script>
+</body>
+</html>
